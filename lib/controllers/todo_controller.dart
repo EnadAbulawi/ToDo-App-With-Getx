@@ -2,11 +2,19 @@ import 'package:get/get.dart';
 import 'package:todo_app_getx/models/todo.dart';
 import 'package:todo_app_getx/services/storage_service.dart';
 
+enum FilterStatus { all, completed, incomplete }
+
 class TodoController extends GetxController {
   // قائمة مهام تفاعلية
   var todos = <Todo>[].obs;
   // خدمة التخزين
   final StorageService _storage = StorageService();
+
+  //  حالة الفلترة (كل، مكتملة، غير مكتملة)
+  var filterStatus = FilterStatus.all.obs;
+
+  //  نص البحث
+  var searchQuery = ''.obs;
 
   @override
   void onInit() {
@@ -44,4 +52,23 @@ class TodoController extends GetxController {
 
   // حذف مهمة
   void deleteTodo(String id) => todos.removeWhere((t) => t.id == id);
+
+  //Getter لإرجاع المهام بعد تطبيق الفلترة والبحث
+  List<Todo> get filteredTodos {
+    return todos.where((t) {
+      // فلترة حسب الحالة
+      if (filterStatus.value == FilterStatus.completed && !t.done) {
+        return false;
+      }
+      if (filterStatus.value == FilterStatus.incomplete && t.done) {
+        return false;
+      }
+      // فلترة حسب نص البحث
+      if (searchQuery.value.isNotEmpty &&
+          !t.title.toLowerCase().contains(searchQuery.value.toLowerCase())) {
+        return false;
+      }
+      return true;
+    }).toList();
+  }
 }
