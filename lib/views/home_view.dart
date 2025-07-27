@@ -21,9 +21,34 @@ class HomeView extends GetView<TodoController> {
             return ListTile(
               title: Text(todo.title),
               subtitle: Text(todo.description),
-              trailing: Checkbox(
-                value: todo.done,
-                onChanged: (value) => controller.toggleDone(todo.id),
+              trailing: Wrap(
+                spacing: 12, // space between icons
+                children: [
+                  // --- Checkbox لتغيير حالة الإنجاز ---
+                  Checkbox(
+                    value: todo.done,
+                    onChanged: (value) => controller.toggleDone(todo.id),
+                  ),
+                  // --- زر الحذف ---
+                  IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () {
+                      // Get.defaultDialog: طريقة GetX لعرض مربع حوار بسرعة
+                      Get.defaultDialog(
+                        title: 'تأكيد الحذف',
+                        middleText: 'هل أنت متأكد أنك تريد حذف هذه المهمة؟',
+                        textConfirm: 'حذف',
+                        textCancel: 'إلغاء',
+                        confirmTextColor: Colors.white,
+                        onConfirm: () {
+                          controller.deleteTodo(todo.id);
+                          Get.back(); // إغلاق مربع الحوار
+                        },
+                        onCancel: () => Get.back(), // إغلاق مربع الحوار
+                      );
+                    },
+                  ),
+                ],
               ),
               onTap: () => Get.toNamed(AppRoutes.ADD_EDIT, arguments: todo),
             );
