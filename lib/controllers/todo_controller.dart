@@ -19,6 +19,8 @@ class TodoController extends GetxController {
 
   final _notif = Get.find<NotificationService>();
 
+  // قائمة الفئات المتاحة
+  final List<String> categories = ['عام', 'عمل', 'دراسة', 'شخصي'];
   @override
   void onInit() {
     super.onInit();
@@ -29,8 +31,20 @@ class TodoController extends GetxController {
   }
 
   // إضافة مهمة جديدة
-  void addTodo(String title, String description, DateTime? dueDate) {
-    final todo = Todo(title: title, description: description, dueDate: dueDate);
+  void addTodo(
+    String title,
+    String description,
+    DateTime? dueDate,
+    String category,
+    Priority priority,
+  ) {
+    final todo = Todo(
+      title: title,
+      description: description,
+      dueDate: dueDate,
+      category: category,
+      priority: priority,
+    );
     todos.add(todo);
     // جدولة الإشعار إذا حُدِّد موعد
     if (dueDate != null) {
@@ -49,13 +63,17 @@ class TodoController extends GetxController {
     String title,
     String description,
     DateTime? dueDate,
+    String category,
+    Priority priority,
   ) {
     final idx = todos.indexWhere((t) => t.id == id);
     if (idx >= 0) {
       final old = todos[idx];
-      todos[idx].title = title;
-      todos[idx].description = description;
-      todos[idx].dueDate = dueDate;
+      old.title = title;
+      old.description = description;
+      old.dueDate = dueDate;
+      old.category = category;
+      old.priority = priority;
       todos.refresh();
 
       final nid = id.hashCode;
@@ -119,5 +137,13 @@ class TodoController extends GetxController {
     final item = todos.removeAt(oldIndex);
     todos.insert(newIndex, item);
     // بما أن ever() ربط الحفظ تلقائيًا مع todos، سيُحفظ الترتيب الجديد
+  }
+
+  // حساب عدد المهام في كل فئة
+  Map<String, int> get categoryCounts {
+    return {
+      for (var cat in categories)
+        cat: todos.where((t) => t.category == cat).length,
+    };
   }
 }
