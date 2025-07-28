@@ -48,46 +48,97 @@ class HomeView extends GetView<TodoController> {
               );
             }),
             const SizedBox(height: 12),
+            // ——— القائمة مع دعم السحب لإعادة الترتيب ———
             Expanded(
               child: Obx(() {
-                final todos = controller
-                    .filteredTodos; // Assuming you have a list of todos in the controller
-                if (todos.isEmpty) {
+                //  إذا كان هناك فلترة أو بحث، نعرض القائمة بدون إعادة ترتيب
+                if (controller.filterStatus.value != FilterStatus.all ||
+                    controller.searchQuery.value.isNotEmpty) {
+                  final filterd = controller.filteredTodos;
+                  if (filterd.isEmpty) {
+                    return Center(child: Text('لا توجد مهام مطابقة'));
+                  }
+
+                  return ListView.builder(
+                    itemCount: filterd.length,
+                    itemBuilder: (context, i) {
+                      final todo = filterd[i];
+                      return ListTile(
+                        title: Text(todo.title),
+                        subtitle: Text(todo.description),
+                        trailing: Wrap(
+                          spacing: 12, // space between icons
+                          children: [
+                            // --- Checkbox لتغيير حالة الإنجاز ---
+                            Checkbox(
+                              value: todo.done,
+                              onChanged: (value) =>
+                                  controller.toggleDone(todo.id),
+                            ),
+                            // --- زر الحذف ---
+                            IconButton(
+                              icon: Icon(Icons.delete),
+                              onPressed: () {
+                                // Get.defaultDialog: طريقة GetX لعرض مربع حوار بسرعة
+                                Get.defaultDialog(
+                                  title: 'تأكيد الحذف',
+                                  middleText:
+                                      'هل أنت متأكد أنك تريد حذف هذه المهمة؟',
+                                  textConfirm: 'حذف',
+                                  textCancel: 'إلغاء',
+                                  confirmTextColor: Colors.white,
+                                  onConfirm: () {
+                                    controller.deleteTodo(todo.id);
+                                    Get.back(); // إغلاق مربع الحوار
+                                  },
+                                  onCancel: () =>
+                                      Get.back(), // إغلاق مربع الحوار
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                        onTap: () =>
+                            Get.toNamed(AppRoutes.ADD_EDIT, arguments: todo),
+                      );
+                    },
+                  );
+                }
+                // الوضع الافتراضي: كل المهام مع إعادة الترتيب
+                final alltodos = controller.todos;
+                if (alltodos.isEmpty) {
                   return Center(child: Text('لا توجد مهام'));
                 }
-                return ListView.builder(
-                  itemCount: todos.length,
-                  itemBuilder: (context, i) {
-                    final todo = todos[i];
+                return ReorderableListView(
+                  onReorder: controller.reorderTodos,
+                  children: alltodos.map((todo) {
                     return ListTile(
+                      key: ValueKey(todo.id),
                       title: Text(todo.title),
-                      subtitle: Text(todo.description),
+                      subtitle: todo.description.isNotEmpty
+                          ? Text(todo.description)
+                          : null,
                       trailing: Wrap(
-                        spacing: 12, // space between icons
+                        spacing: 12,
                         children: [
-                          // --- Checkbox لتغيير حالة الإنجاز ---
                           Checkbox(
                             value: todo.done,
-                            onChanged: (value) =>
-                                controller.toggleDone(todo.id),
+                            onChanged: (_) => controller.toggleDone(todo.id),
                           ),
-                          // --- زر الحذف ---
                           IconButton(
-                            icon: Icon(Icons.delete),
+                            icon: const Icon(Icons.delete),
+                            tooltip: 'حذف المهمة',
                             onPressed: () {
-                              // Get.defaultDialog: طريقة GetX لعرض مربع حوار بسرعة
                               Get.defaultDialog(
                                 title: 'تأكيد الحذف',
-                                middleText:
-                                    'هل أنت متأكد أنك تريد حذف هذه المهمة؟',
+                                middleText: 'هل أنت متأكد من حذف هذه المهمة؟',
                                 textConfirm: 'حذف',
                                 textCancel: 'إلغاء',
                                 confirmTextColor: Colors.white,
                                 onConfirm: () {
                                   controller.deleteTodo(todo.id);
-                                  Get.back(); // إغلاق مربع الحوار
+                                  Get.back();
                                 },
-                                onCancel: () => Get.back(), // إغلاق مربع الحوار
                               );
                             },
                           ),
@@ -96,7 +147,7 @@ class HomeView extends GetView<TodoController> {
                       onTap: () =>
                           Get.toNamed(AppRoutes.ADD_EDIT, arguments: todo),
                     );
-                  },
+                  }).toList(),
                 );
               }),
             ),

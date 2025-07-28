@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:todo_app_getx/models/todo.dart';
+import 'package:todo_app_getx/services/notification_service.dart';
 import 'package:todo_app_getx/services/storage_service.dart';
 
 enum FilterStatus { all, completed, incomplete }
@@ -16,6 +17,8 @@ class TodoController extends GetxController {
   //  نص البحث
   var searchQuery = ''.obs;
 
+  final _notif = Get.find<NotificationService>();
+
   @override
   void onInit() {
     super.onInit();
@@ -26,18 +29,48 @@ class TodoController extends GetxController {
   }
 
   // إضافة مهمة جديدة
-  void addTodo(String title, String description) {
-    final todo = Todo(title: title, description: description);
+  void addTodo(String title, String description, DateTime? dueDate) {
+    final todo = Todo(title: title, description: description, dueDate: dueDate);
     todos.add(todo);
+    // جدولة الإشعار إذا حُدِّد موعد
+    if (dueDate != null) {
+      _notif.scheduleNotification(
+        id: todo.id.hashCode, // استخدام hashCode لضمان id مناسب
+        title: 'موعد المهمة: ${todo.title}',
+        body: todo.description,
+        scheduledDate: dueDate,
+      );
+    }
   }
 
   // تعديل مهمة موجودة
-  void updateTodo(String id, String title, String description) {
-    final index = todos.indexWhere((t) => t.id == id);
-    if (index != -1) {
-      todos[index].title = title;
-      todos[index].description = description;
+  void updateTodo(
+    String id,
+    String title,
+    String description,
+    DateTime? dueDate,
+  ) {
+    final idx = todos.indexWhere((t) => t.id == id);
+    if (idx >= 0) {
+      final old = todos[idx];
+      todos[idx].title = title;
+      todos[idx].description = description;
+      todos[idx].dueDate = dueDate;
       todos.refresh();
+
+      final nid = id.hashCode;
+      // أولاً نلغي الإشعار القديم
+      _notif.cancelNotification(nid);
+
+      // ثم نعيد الجدولة إذا بقي موعد
+      if (dueDate != null) {
+        _notif.scheduleNotification(
+          id: nid,
+          title: 'موعد المهمة: $title',
+          body: description,
+          scheduledDate: dueDate,
+        );
+      }
     }
   }
 
@@ -51,7 +84,12 @@ class TodoController extends GetxController {
   }
 
   // حذف مهمة
-  void deleteTodo(String id) => todos.removeWhere((t) => t.id == id);
+  void deleteTodo(String id) {
+    todos.removeWhere((t) => t.id == id);
+    final nid = id.hashCode;
+    // إلغاء الإشعار عند حذف المهمة
+    _notif.cancelNotification(nid);
+  }
 
   //Getter لإرجاع المهام بعد تطبيق الفلترة والبحث
   List<Todo> get filteredTodos {
@@ -70,5 +108,16 @@ class TodoController extends GetxController {
       }
       return true;
     }).toList();
+  }
+
+  /// يعيد ترتيب قائمة todos
+  /// [oldIndex] هو موضع العنصر المسحوب أصلاً
+  /// [newIndex] هو الموضع الذي سُحب إليه (بعد تحويله)
+  void reorderTodos(int oldIndex, int newIndex) {
+    // عند رفع العنصر للأعلى، newIndex يكون أكبر بمقدار 1
+    if (newIndex > oldIndex) newIndex--;
+    final item = todos.removeAt(oldIndex);
+    todos.insert(newIndex, item);
+    // بما أن ever() ربط الحفظ تلقائيًا مع todos، سيُحفظ الترتيب الجديد
   }
 }
