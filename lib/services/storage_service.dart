@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:get_storage/get_storage.dart';
 import 'package:todo_app_getx/models/todo.dart';
 
@@ -7,17 +9,32 @@ class StorageService {
 
   /// تحميل المهام من الـ GetStorage
   List<Todo> readTodos() {
-    final data = _box.read<List<dynamic>>(_boxKey);
-    if (data == null) return [];
-    return data.map((e) => Todo.fromJson(Map.from(e))).toList();
+    final raw = _box.read<List<dynamic>>(_boxKey);
+    log('>> قراءة خام: $raw');
+    if (raw == null) return [];
+
+    return raw.map((e) {
+      final Map<String, dynamic> json = Map.from(e as Map);
+      // تأكد من وجود مفتاح 'category' و'priority' حتى على البيانات القديمة
+      if (!json.containsKey('category')) {
+        json['category'] = 'عام';
+      }
+      if (!json.containsKey('priority')) {
+        json['priority'] = Priority.medium.toString();
+      }
+      return Todo.fromJson(json);
+    }).toList();
   }
 
   /// حفظ المهام في الـ GetStorage
-  void writeTodos(List<Todo> todos) =>
-      _box.write(_boxKey, todos.map((t) => t.toJson()).toList());
+  void writeTodos(List<Todo> todos) {
+    final list = todos.map((t) => t.toJson()).toList();
+    log('>> حفظ خام: $list'); // يجب أن ترى "category":"شخصي" مثلاً
+    _box.write(_boxKey, list);
+  }
 
-  /// حذف جميع المهام من الـ GetStorage
-  void clearTodos() {
-    _box.remove(_boxKey);
+  /// **للتنظيف**: تفريغ البيانات القديمة إذا أردت تجربة نظيفة
+  void clearTodos() async {
+    await _box.remove(_boxKey);
   }
 }

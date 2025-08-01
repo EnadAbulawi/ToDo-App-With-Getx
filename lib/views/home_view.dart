@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:todo_app_getx/controllers/todo_controller.dart';
 import 'package:todo_app_getx/routes/app_routes.dart';
 import 'package:todo_app_getx/views/widgets/filter_todo_widget.dart';
-
+import 'package:todo_app_getx/views/widgets/todo_animated_listview.dart';
 import 'widgets/category_count_widget.dart';
 import 'widgets/search_widget.dart';
 import 'widgets/todo_listview.dart';
@@ -14,11 +14,21 @@ class HomeView extends GetView<TodoController> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => FocusScope.of(
-        context,
-      ).unfocus(), // لإغلاق لوحة المفاتيح عند النقر في أي مكان
+      // لإغلاق لوحة المفاتيح عند النقر في أي مكان
+      onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        appBar: AppBar(title: Text('قائمة المهام')),
+        appBar: AppBar(
+          surfaceTintColor: Colors.transparent,
+          title: Text('قائمة المهام'),
+          actions: [
+            IconButton(
+              onPressed: () => Get.changeThemeMode(
+                Get.isDarkMode ? ThemeMode.light : ThemeMode.dark,
+              ),
+              icon: Icon(Get.isDarkMode ? Icons.light_mode : Icons.dark_mode),
+            ),
+          ],
+        ),
         body: Column(
           children: [
             // —— ملخص الفئات مع عدد المهام ——
@@ -29,7 +39,7 @@ class HomeView extends GetView<TodoController> {
             FilterTodoWidget(controller: controller),
             const SizedBox(height: 12),
             // ——— القائمة مع دعم السحب لإعادة الترتيب ———
-            TodoListview(controller: controller),
+            TodoAnimatedListView(controller: controller),
           ],
         ),
 
@@ -41,3 +51,28 @@ class HomeView extends GetView<TodoController> {
     );
   }
 }
+
+/// ويدجت لبناء بطاقة فئة واحدة
+// Widget _buildCategoryCard(String cat, int count , TodoController controller) {
+//   return Card(
+//     color: _categoryColors[cat],
+//     elevation: 2,
+//     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+//     child: SizedBox(
+//       width: 100,
+//       child: Padding(
+//         padding: const EdgeInsets.all(8),
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             Icon(_categoryIcons[cat], size: 28, color: Colors.black54),
+//             const SizedBox(height: 6),
+//             Text(cat, style: const TextStyle(fontWeight: FontWeight.bold)),
+//             const SizedBox(height: 4),
+//             Text('$count', style: const TextStyle(fontSize: 16)),
+//           ],
+//         ),
+//       ),
+//     ),
+//   );
+// }

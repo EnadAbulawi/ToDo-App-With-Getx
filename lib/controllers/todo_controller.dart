@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:todo_app_getx/models/todo.dart';
 import 'package:todo_app_getx/services/notification_service.dart';
@@ -21,6 +22,18 @@ class TodoController extends GetxController {
 
   // قائمة الفئات المتاحة
   final List<String> categories = ['عام', 'عمل', 'دراسة', 'شخصي'];
+  final Map<String, Color> categoryColor = {
+    'عام': Colors.blue,
+    'عمل': Colors.green,
+    'دراسة': Colors.orange,
+    'شخصي': Colors.purple,
+  };
+  final Map<String, IconData> categoryIcon = {
+    'عام': Icons.category,
+    'عمل': Icons.work,
+    'دراسة': Icons.school,
+    'شخصي': Icons.person,
+  };
   @override
   void onInit() {
     super.onInit();
@@ -68,12 +81,12 @@ class TodoController extends GetxController {
   ) {
     final idx = todos.indexWhere((t) => t.id == id);
     if (idx >= 0) {
-      final old = todos[idx];
-      old.title = title;
-      old.description = description;
-      old.dueDate = dueDate;
-      old.category = category;
-      old.priority = priority;
+      final todo = todos[idx];
+      todo.title = title;
+      todo.description = description;
+      todo.dueDate = dueDate;
+      todo.category = category;
+      todo.priority = priority;
       todos.refresh();
 
       final nid = id.hashCode;
@@ -126,6 +139,29 @@ class TodoController extends GetxController {
       }
       return true;
     }).toList();
+  }
+
+  void deleteWithUndo(Todo todo) {
+    final backup = todo;
+    deleteTodo(todo.id);
+    Get.snackbar(
+      'تم حذف المهمة',
+      'تم حذف "${todo.title}"',
+      snackPosition: SnackPosition.BOTTOM,
+      mainButton: TextButton(
+        onPressed: () {
+          addTodo(
+            backup.title,
+            backup.description,
+            backup.dueDate,
+            backup.category,
+            backup.priority,
+          );
+        },
+        child: const Text('تراجع'),
+      ),
+      duration: const Duration(seconds: 4),
+    );
   }
 
   /// يعيد ترتيب قائمة todos
