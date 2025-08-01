@@ -10,10 +10,10 @@ class AddEditView extends GetView<TodoController> {
   TimeOfDay? _pickedTime; // ← يخزن الوقت
   String _selectedCategory = 'عام'; // ← يخزن الفئة المختارة
   final List<String> _categories = [
-    'عام',
-    'عمل',
-    'دراسة',
-    'شخصي',
+    'عام'.tr,
+    'عمل'.tr,
+    'دراسة'.tr,
+    'شخصي'.tr,
   ]; // ← قائمة الفئات
   Priority _selectedPriority = Priority.low; // ← يخزن الأولوية المختارة
 
@@ -46,18 +46,20 @@ class AddEditView extends GetView<TodoController> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(todo == null ? 'إضافة مهمة' : 'تعديل مهمة')),
+      appBar: AppBar(
+        title: Text(todo == null ? 'إضافة مهمة'.tr : 'تعديل مهمة'.tr),
+      ),
       body: Padding(
         padding: EdgeInsetsGeometry.symmetric(horizontal: 20),
         child: Column(
           children: [
             TextField(
               controller: _titleController,
-              decoration: InputDecoration(labelText: 'العنوان'),
+              decoration: InputDecoration(labelText: 'task_title'.tr),
             ),
             TextField(
               controller: _descriptionController,
-              decoration: InputDecoration(labelText: 'الوصف'),
+              decoration: InputDecoration(labelText: 'task_description'.tr),
             ),
             SizedBox(height: 20),
             // زر اختيار التاريخ
@@ -65,7 +67,7 @@ class AddEditView extends GetView<TodoController> {
               icon: const Icon(Icons.calendar_today),
               label: Text(
                 _pickedDate == null
-                    ? 'اختر التاريخ'
+                    ? 'due_date'.tr
                     : '${_pickedDate!.year}/${_pickedDate!.month}/${_pickedDate!.day}',
               ),
               onPressed: () async {
@@ -84,7 +86,7 @@ class AddEditView extends GetView<TodoController> {
               icon: const Icon(Icons.access_time),
               label: Text(
                 _pickedTime == null
-                    ? 'اختر الوقت'
+                    ? 'due_time'.tr
                     : _pickedTime!.format(context),
               ),
               onPressed: () async {
@@ -121,7 +123,7 @@ class AddEditView extends GetView<TodoController> {
                 }
                 Get.back(); // العودة إلى الشاشة السابقة
               },
-              child: Text(todo == null ? 'إضافة' : 'تعديل'),
+              child: Text(todo == null ? 'add_task'.tr : 'تعديل'.tr),
             ),
 
             SizedBox(height: 20),
@@ -131,7 +133,7 @@ class AddEditView extends GetView<TodoController> {
               items: _categories.map((cat) {
                 return DropdownMenuItem(value: cat, child: Text(cat));
               }).toList(),
-              decoration: InputDecoration(labelText: 'الفئة'),
+              decoration: InputDecoration(labelText: 'الفئة'.tr),
               onChanged: (v) => _selectedCategory = v!,
             ),
             SizedBox(height: 20),
@@ -140,16 +142,16 @@ class AddEditView extends GetView<TodoController> {
               value: _selectedPriority,
               items: Priority.values.map((p) {
                 final label = {
-                  Priority.low: 'منخفضة',
-                  Priority.medium: 'متوسطة',
-                  Priority.high: 'مرتفعة',
+                  Priority.low: 'منخفضة'.tr,
+                  Priority.medium: 'متوسطة'.tr,
+                  Priority.high: 'مرتفعة'.tr,
                 };
                 return DropdownMenuItem(
                   value: p,
-                  child: Text(label[p] ?? 'غير محددة'),
+                  child: Text(label[p] ?? 'غير محددة'.tr),
                 );
               }).toList(),
-              decoration: InputDecoration(labelText: 'الأولوية'),
+              decoration: InputDecoration(labelText: 'الأولوية'.tr),
               onChanged: (v) => _selectedPriority = v!,
             ),
           ],

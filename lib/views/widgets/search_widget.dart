@@ -13,7 +13,7 @@ class SearchWidget extends StatelessWidget {
       child: TextField(
         onChanged: controller.searchQuery,
         decoration: InputDecoration(
-          hintText: 'ابحث عن مهمة...',
+          hintText: 'ابحث عن مهمة...'.tr,
           prefixIcon: const Icon(Icons.search),
           filled: true,
           fillColor: Theme.of(context).colorScheme.surfaceVariant,

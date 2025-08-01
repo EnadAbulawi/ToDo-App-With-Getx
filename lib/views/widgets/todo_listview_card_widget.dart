@@ -65,10 +65,10 @@ class _TodoListviewCardWidgetState extends State<TodoListviewCardWidget> {
         trailing: IconButton(
           icon: const Icon(Icons.delete_outline),
           onPressed: () => Get.defaultDialog(
-            title: 'تأكيد الحذف',
-            middleText: 'هل تريد حذف هذه المهمة؟',
-            textConfirm: 'حذف',
-            textCancel: 'إلغاء',
+            title: 'تأكيد الحذف'.tr,
+            middleText: 'هل تريد حذف هذه المهمة؟'.tr,
+            textConfirm: 'حذف'.tr,
+            textCancel: 'إلغاء'.tr,
             confirmTextColor: Colors.white,
             onConfirm: () {
               widget.controller.deleteTodo(widget.todo.id);

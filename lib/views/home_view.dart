@@ -6,7 +6,6 @@ import 'package:todo_app_getx/views/widgets/filter_todo_widget.dart';
 import 'package:todo_app_getx/views/widgets/todo_animated_listview.dart';
 import 'widgets/category_count_widget.dart';
 import 'widgets/search_widget.dart';
-import 'widgets/todo_listview.dart';
 
 class HomeView extends GetView<TodoController> {
   const HomeView({super.key});
@@ -19,8 +18,14 @@ class HomeView extends GetView<TodoController> {
       child: Scaffold(
         appBar: AppBar(
           surfaceTintColor: Colors.transparent,
-          title: Text('قائمة المهام'),
+          title: Text('قائمة المهام'.tr),
           actions: [
+            // زر الإعدادات
+            IconButton(
+              onPressed: () => Get.toNamed(AppRoutes.SETTINGS),
+              icon: const Icon(Icons.settings),
+            ),
+            // زر تغيير الوضع المظلم
             IconButton(
               onPressed: () => Get.changeThemeMode(
                 Get.isDarkMode ? ThemeMode.light : ThemeMode.dark,
